@@ -13,7 +13,24 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -DRELEASE")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_executable(qt_cpackifw WIN32 MACOSX_BUNDLE src/main.cpp)
+find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+	qt_add_executable(qt_cpackifw WIN32 MANUAL_FINALIZATION MACOSX_BUNDLE src/main.cpp)
+else()
+	if(ANDROID)
+		add_library(qt_cpackifw SHARED ${PROJECT_SOURCES})
+	else()
+		add_executable(qt_cpackifw WIN32 ${PROJECT_SOURCES})
+	endif()
+endif()
+
+target_link_libraries(qt_cpackifw PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
+if(QT_VERSION_MAJOR EQUAL 6)
+	qt_finalize_executable(qt_cpackifw)
+endif()
 
 install(
     TARGETS qt_cpackifw
